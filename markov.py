@@ -58,12 +58,13 @@ def make_chains(text_string, n_gram):
     return chains
 
 
-
-
 def make_text(chains):
     """Return text from chains."""
     words = []
     curr_key = random.choice(list(chains.keys())) # tuple
+
+    while curr_key[0][0].islower():
+        curr_key = random.choice(list(chains.keys()))
     # print(type(curr_key))
     n_gram = len(curr_key)
     words.extend([curr_key[i] for i in range(n_gram)])
