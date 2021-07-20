@@ -19,7 +19,7 @@ def open_and_read_file(file_path):
     return text_string
 
 
-def make_chains(text_string):
+def make_chains(text_string, n_gram):
     """Take input text as string; return dictionary of Markov chains.
 
     A chain will be a key that consists of a tuple of (word1, word2)
@@ -47,26 +47,32 @@ def make_chains(text_string):
     chains = {}
     text_list = text_string.split(" ")
     list_len = len(text_list)
-    for i in range(list_len-2):
-        key = (text_list[i], text_list[i+1])
+    for i in range(list_len-n_gram):
+        key = [text_list[i+n] for n in range(n_gram)]
+        key = tuple(key)# = (text_list[i], text_list[i+1])
         if chains.get(key, 0) == 0:
-            chains[key] = [text_list[i+2]] 
+            chains[key] = [text_list[i+n_gram]] 
         else:    
-            chains[key].append(text_list[i+2])
+            chains[key].append(text_list[i+n_gram])
    
     return chains
+
 
 
 
 def make_text(chains):
     """Return text from chains."""
     words = []
-    curr_key = random.choice(list(chains.keys()))
-    words.extend([curr_key[0],curr_key[1]])
+    curr_key = random.choice(list(chains.keys())) # tuple
+    # print(type(curr_key))
+    n_gram = len(curr_key)
+    words.extend([curr_key[i] for i in range(n_gram)])
     while True:
-        to_append = random.choice(chains[curr_key])
+        to_append = random.choice(chains[curr_key]) # string
         words.append(to_append)
-        next_key = (curr_key[1], to_append)
+        next_key = [curr_key[i] for i in range(1, n_gram)]
+        next_key.append(to_append)
+        next_key = tuple(next_key)
         if next_key in chains:
             curr_key = next_key
         else:
@@ -84,8 +90,8 @@ if __name__ == '__main__':
     input_text = open_and_read_file(input_path)
 
     # Get a Markov chain
-    n_gram_size = 2
-    chains = make_chains(input_text)
+    n_gram_size = 3
+    chains = make_chains(input_text, n_gram_size)
 
     # Produce random text
     random_text = make_text(chains)
