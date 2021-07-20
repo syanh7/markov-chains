@@ -1,7 +1,8 @@
 """Generate Markov text from text files."""
 
-from random import choice
-
+#from random import choice
+import random
+import sys
 
 def open_and_read_file(file_path):
     """Take file path as string; return text as string.
@@ -10,9 +11,12 @@ def open_and_read_file(file_path):
     the file's contents as one string of text.
     """
 
-    # your code goes here
 
-    return 'Contents of your file as one long string'
+    file = open(file_path)
+    text_string = file.read().replace("\n", " ").rstrip()
+    file.close()
+
+    return text_string
 
 
 def make_chains(text_string):
@@ -39,33 +43,51 @@ def make_chains(text_string):
         >>> chains[('there','juanita')]
         [None]
     """
-
+    
     chains = {}
-
-    # your code goes here
-
+    text_list = text_string.split(" ")
+    list_len = len(text_list)
+    for i in range(list_len-2):
+        key = (text_list[i], text_list[i+1])
+        if chains.get(key, 0) == 0:
+            chains[key] = [text_list[i+2]] 
+        else:    
+            chains[key].append(text_list[i+2])
+   
     return chains
+
 
 
 def make_text(chains):
     """Return text from chains."""
-
     words = []
-
-    # your code goes here
+    curr_key = random.choice(list(chains.keys()))
+    words.extend([curr_key[0],curr_key[1]])
+    while True:
+        to_append = random.choice(chains[curr_key])
+        words.append(to_append)
+        next_key = (curr_key[1], to_append)
+        if next_key in chains:
+            curr_key = next_key
+        else:
+            break
 
     return ' '.join(words)
 
 
-input_path = 'green-eggs.txt'
+if __name__ == '__main__':
+    
+    argv = sys.argv[1]
+    input_path = argv
 
-# Open the file and turn it into one long string
-input_text = open_and_read_file(input_path)
+    # Open the file and turn it into one long string
+    input_text = open_and_read_file(input_path)
 
-# Get a Markov chain
-chains = make_chains(input_text)
+    # Get a Markov chain
+    n_gram_size = 2
+    chains = make_chains(input_text)
 
-# Produce random text
-random_text = make_text(chains)
+    # Produce random text
+    random_text = make_text(chains)
 
-print(random_text)
+    print(random_text)
